@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>实时预览本地摄像头</title>
+  </head>
+  <body>
+    <video id="localVideo" autoplay="true"></video>
+ 
+    <script>
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia({video: true}, function(stream) {
+                var localVideo = document.getElementById("localVideo");
+                localVideo.srcObject = stream;
+            }, function(error) {
+                console.error(error);
+            });
+        } else {
+            alert("您的浏览器不支持获取本地摄像头！");
+        }
+    </script>
+  </body>
+</html>
