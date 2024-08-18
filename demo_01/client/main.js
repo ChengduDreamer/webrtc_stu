@@ -338,6 +338,9 @@ function getOffer(desc){
 	offerdesc = desc;
 
 	//send offer sdp
+
+	console.log("offer is:[" + offerdesc + "]");
+
 	sendMessage(roomid, offerdesc);	
 
 }
