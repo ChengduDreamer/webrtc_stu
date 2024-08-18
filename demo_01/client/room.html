@@ -1,60 +1,49 @@
-<html > 
-	<head > 
-		<title >WebRTC PeerConnection </title > 
+<html>
+	<head>
+		<title>WebRTC PeerConnection</title>
 			<link href="client.css" rel="stylesheet" /> 
-	</head > 
+	</head>
 
-	<body > 
-		<div > 
+	<body>
+		<div>
 		  <!-- 
-			 ç”¨æˆ·æ“ä½œåŒºï¼Œ åŒ…æ‹¬ä¸¤ä¸ªButton ï¼š 
-			 ä¸€ä¸ªç”¨æˆ·è¿žæŽ¥ä¿¡ä»¤æœåŠ¡å™¨ï¼› å¦ä¸€ä¸ªç”¨æˆ·ä¸Žä¿¡ä»¤æœåŠ¡å™¨æ–­å¼€è¿žæŽ¥ 
+			 ÓÃ»§²Ù×÷Çø£¬ °üÀ¨Á½¸öButton £º 
+			 Ò»¸öÓÃ»§Á¬½ÓÐÅÁî·þÎñÆ÷£» ÁíÒ»¸öÓÃ»§ÓëÐÅÁî·þÎñÆ÷¶Ï¿ªÁ¬½Ó 
 		 --> 
-			<div > 
-				<button id="connserver">ConnServer </button > 
-				<button id="leave" disabled >Leave </button > 
-			</div > 
+
+
+			<div>
+				<button id="connserver">Connect Sig Server</button>
+				<!--<button id="start" disabled>Start</button>	
+				<button id="call" disabled>Call</button>	
+				<button id="hangup" disabled>HangUp</button>	
+				-->
+				<button id="leave" disabled>Leave</button>	
+			</div>
 
 			<div>
 				<input id="shareDesk" type="checkbox"/><label for="shareDesk">Share Desktop</label>
 			</div>
 
-		   <!-- 
-			   æ˜¾ç¤ºåŒºï¼Œ ç”¨äºŽå±•ç¤ºï¼š 
-			   Â·è§†é¢‘ 
-			   Â·Offer/Answer 
-		   --> 
-			<div id="preview"> 
-			   <!-- 
-					 æœ¬åœ°è§†é¢‘ä¸ŽOffer çš„å±•ç¤ºåŒº 
-				--> 
-			   <div > 
-					 <h2 >Local:</h2 > 
-					 <video id="localvideo" autoplay playsinline muted ></video 
 
-					 <h2 >Offer SDP:</h2 > 
-					 <textarea id="offer" ></textarea > 
-			   </div > 
-			   <!-- 
-					 è¿œç«¯è§†é¢‘ä¸ŽAnswer çš„å±•ç¤ºåŒº 
-			   --> 
-				<div > 
-					 <h2 >Remote:</h2 > 
-					 <video id="remotevideo" autoplay playsinline ></video > 
-					 <h2 >Answer SDP:</h2 > 
-					 <textarea id="answer" ></textarea > 
-				</div > 
-			</div > 
-		</div > 
+			<div id="preview">
+				<div >
+					<h2>Local:</h2>
+					<video id="localvideo" autoplay playsinline muted></video>
+					<h2>Offer SDP:</h2>
+					<textarea id="offer"></textarea>
+				</div>
+				<div>
+					<h2>Remote:</h2>
+					<video id="remotevideo" autoplay playsinline></video>
+					<h2>Answer SDP:</h2>
+					<textarea id="answer"></textarea>
+				</div>
+			</div>
+		</div>
 
-		<!-- 
-			 å¼•ç”¨çš„JavaScript è„šæœ¬åº“ï¼š 
-			 socket.io.js ï¼š ç”¨äºŽè¿žæŽ¥ä¿¡ä»¤æœåŠ¡å™¨ 
-			 adapter -latest.js ï¼š ç”¨äºŽæµè§ˆå™¨é€‚é…Chrome , Firefox â€¦ 
-			 main.js ï¼š WebRTC å®¢æˆ·ç«¯ä»£ç  
-		--> 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"> </script > 
-		<script src="https://webrtc.github.io/adapter/adapter-latest.js"> </script > 
-		<script src="main.js"> </script > 
-	</body > 
-</html >
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+		<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+		<script src="./main.js"></script>
+	</body>
+</html>

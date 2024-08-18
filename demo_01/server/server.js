@@ -1,4 +1,5 @@
-// 001
+'use strict'
+
 var log4js = require('log4js');
 var http = require('http');
 var https = require('https');
@@ -106,6 +107,7 @@ io.sockets.on('connection', (socket)=> {
 		socket.to(room).emit('bye', room, socket.id);
 		 // 通知用户服务器已处理 
 		socket.emit('leaved', room, socket.id);
+
 	});
 
 });
