@@ -5,17 +5,32 @@
     <title>实时预览本地摄像头</title>
   </head>
   <body>
-    <video id="localVideo" autoplay="true"></video>
- 
+    <video id="localVideo" autoplay="true"  playsinline="true"></video>
+    <!--navigator.getUserMedia 是旧版API, navigator.mediaDevices.getUserMedia 是新版API, 不知道为什么本机测试 navigator.mediaDevices.getUserMedia 失败 -->
+    <!-- 测试的时候,如果使用 http://ip:port 是无法打开摄像头的，使用localhost才可以 http://localhost:8888/visor_local_video.html ，或者用https-->
+    <!-- 下面的 {video: true} 是 个MediaStreamConstrains类型的参数, 用来设置采集音视频的各种属性-->
+
+    <!-- MediaStream  与 MediaStreamTrack 
+      MediaStream 可以包括多个 MediaStreamTrack, 比如从摄像头采集到的视频数据是一个MediaStreamTrack，从麦克风采集到的音频数据是一个MediaStreamTrack
+      MediaStream {
+          MediaStreamTrack_0
+          MediaStreamTrack_1
+      }  
+      同一个MediaStream的MediaStreamTrack 会进行时间同步
+    -->
     <script>
         if (navigator.getUserMedia) {
+            console.log("navigator.getUserMedia ");
             navigator.getUserMedia({video: true}, function(stream) {
+                console.log("navigator.getUserMedia get stream");
                 var localVideo = document.getElementById("localVideo");
                 localVideo.srcObject = stream;
             }, function(error) {
+                console.log("can not get stream");
                 console.error(error);
             });
         } else {
+            console.log("!navigator.getUserMedia");
             alert("您的浏览器不支持获取本地摄像头！");
         }
     </script>
