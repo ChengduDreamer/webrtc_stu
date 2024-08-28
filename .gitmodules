@@ -1,0 +1,12 @@
+[submodule "native_dev/client_01/3rdparty/asio2"]
+	path = native_dev/demo_01/3rdparty/asio2
+	url = https://github.com/zhllxt/asio2.git
+[submodule "native_dev/server_01/3rdparty/asio2"]
+	path = native_dev/server_01/3rdparty/asio2
+	url = https://github.com/zhllxt/asio2.git
+[submodule "native_dev/client_01/3rdparty/spdlog"]
+	path = native_dev/demo_01/3rdparty/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "native_dev/client_01/3rdparty/boost"]
+	path = native_dev/demo_01/3rdparty/boost
+	url = https://github.com/boostorg/boost.git
