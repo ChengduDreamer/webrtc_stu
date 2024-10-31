@@ -2,19 +2,21 @@
 
 project(webrtc_client_01 VERSION 1.0.1)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 include(env.cmake)
 
-set(CMAKE_PREFIX_PATH ${QT_ROOT}/lib/cmake)
+#set(CMAKE_PREFIX_PATH ${QT_ROOT}/lib/cmake)
 
 
 
 include(InstallRequiredSystemLibraries)
 
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -51,10 +53,15 @@ include_directories(${CMAKE_SOURCE_DIR}
 					#${OPENSSL_ROOT}/include
 					${CMAKE_SOURCE_DIR}/3rdparty/asio2/include
 					${CMAKE_SOURCE_DIR}/3rdparty/asio2/3rd
+					${CMAKE_SOURCE_DIR}/3rdparty
+					${LIBWEBRTC_INCLUDE_PATH}/third_party/abseil-cpp
+					${LIBWEBRTC_INCLUDE_PATH}
+					
 )
 
 link_directories(
 		${OPENSSL_ROOT}/lib
+		${LIBWEBRTC_BINARY_PATH}
 )
 
 set(common_SOURCES
@@ -63,14 +70,21 @@ set(common_SOURCES
 )
 
 set(client_SOURCES
+	client/settings.cpp
 	client/main.cpp
 	client/context.cpp
+	client/signals_client.cpp
 	client/web_socket_client.cpp
+	#client/ui/main_window.cpp
+	client/rtc/rtc_manager.cpp
+	client/rtc/defaults.cpp
 )
 
 set(server_SOURCES
 	server/main.cpp
 	server/web_socket_server.cpp
+	server/room_manager.cpp
+	server/signals_server.cpp
 )
 
 if(MSVC)
@@ -112,41 +126,44 @@ SET_TARGET_PROPERTIES(rtc_client PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level=\'r
 
 #target_link_libraries(${PROJECT_NAME} mediasoupclient)
 
-target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets)
+#target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets webrtc)
 
-target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets)
+target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 webrtc)
 
+#target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_custom_command(
-					TARGET rtc_client
-					POST_BUILD
-					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_client.exe
-					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	)
-else()
-	add_custom_command(
-					TARGET rtc_client
-					POST_BUILD
-					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_client.exe
-					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	)
-endif()
+target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 )
 
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_custom_command(
-					TARGET rtc_server
-					POST_BUILD
-					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_server.exe
-					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	)
-else()
-	add_custom_command(
-					TARGET rtc_server
-					POST_BUILD
-					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_server.exe
-					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	)
-endif()
-
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+#	add_custom_command(
+#					TARGET rtc_client
+#					POST_BUILD
+#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_client.exe
+#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#	)
+#else()
+#	add_custom_command(
+#					TARGET rtc_client
+#					POST_BUILD
+#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_client.exe
+#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#	)
+#endif()
+#
+#
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+#	add_custom_command(
+#					TARGET rtc_server
+#					POST_BUILD
+#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_server.exe
+#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#	)
+#else()
+#	add_custom_command(
+#					TARGET rtc_server
+#					POST_BUILD
+#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_server.exe
+#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#	)
+#endif()
+#

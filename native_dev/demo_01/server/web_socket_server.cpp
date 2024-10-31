@@ -1,5 +1,8 @@
 #include "web_socket_server.h"
 #include <iostream>
+#include <NlohmannJson/json.hpp>
+#include "yk_logger.h"
+#include "public/signals_def.h"
 namespace yk {
 
 	std::shared_ptr<WebSocketServer> WebSocketServer::Make() {
@@ -47,10 +50,9 @@ namespace yk {
 				}
 			}).bind_recv([=](auto& session_ptr, std::string_view data)
 				{
-					printf("recv : %zu %.*s\n", data.size(), (int)data.size(), data.data());
-
-					session_ptr->async_send(data);
-
+					//printf("recv : %zu %.*s\n", data.size(), (int)data.size(), data.data());
+					//session_ptr->async_send(data);
+					OnRecvMsg(session_ptr, std::string(data));
 				}).bind_connect([](auto& session_ptr)
 					{
 						printf("client enter : %s %u %s %u\n",
@@ -61,6 +63,8 @@ namespace yk {
 						{
 							asio2::ignore_unused(session_ptr);
 							printf("client leave : %s\n", asio2::last_error_msg().c_str());
+
+							// to do
 
 						}).bind_upgrade([](auto& session_ptr)
 							{
@@ -96,5 +100,37 @@ namespace yk {
 									});
 
 		ws_server_->start(host_, port_);
+	}
+
+	void WebSocketServer::SetOnRecvMsgCallback(WSOnRecvMsgCallbackFunc&& cbk) {
+		on_recv_msg_callback_ = cbk;
+	}
+
+	void WebSocketServer::OnRecvMsg(const std::shared_ptr<asio2::ws_session>& session_ptr, std::string msg) {
+		nlohmann::json jsobj;
+		try {
+			jsobj = nlohmann::json::parse(msg);
+		}
+		catch (std::exception& e) {
+			LogE("OnRecvMsg format error!");
+			return;
+		}
+		if (!jsobj.contains("operation_type")) {
+			LogE("OnRecvMsg miss operation_type!");
+			return;
+		}
+		const std::string op_type = jsobj["operation_type"].get<std::string>();
+		std::cout << "operation_type = " << op_type << std::endl;
+		if (kSignalsMsgType_Hello == op_type) {
+			if (!jsobj.contains("client_id")) {
+				LogE("OnRecvMsg miss client_id!");
+				return;
+			}
+			const std::string client_id = jsobj["client_id"].get<std::string>();
+			client_sessions_[client_id] = session_ptr;
+		}
+		if (on_recv_msg_callback_) {
+			on_recv_msg_callback_(msg);
+		}
 	}
 }

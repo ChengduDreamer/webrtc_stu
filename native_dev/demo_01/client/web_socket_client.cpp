@@ -1,5 +1,5 @@
 #include "web_socket_client.h"
-
+#include <NlohmannJson/json.hpp>
 #include "yk_logger.h"
 
 namespace yk {
