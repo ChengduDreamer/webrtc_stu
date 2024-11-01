@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-//#include <qapplication.h>
+#include <qapplication.h>
 
 //#include <absl/flags/parse.h>
 //#include <rtc_base/ssl_adapter.h>
@@ -41,8 +41,8 @@
 using namespace yk;
 // client 
 int main(int argc, char* argv[]) {
-	//QApplication app(argc, argv);
-	//std::cout << "start ..." << std::endl;
+	QApplication app(argc, argv);
+	std::cout << "start ..." << std::endl;
 
 	rtc::WinsockInitializer winsock_init;
 	rtc::PhysicalSocketServer ss;
@@ -74,6 +74,6 @@ int main(int argc, char* argv[]) {
 	//MainWindow main_window{ ctx };
 	//main_window.show();
 	//
-	//app.exec();
+	app.exec();
 	return 0;
 }

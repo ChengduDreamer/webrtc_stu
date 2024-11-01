@@ -32,6 +32,8 @@ namespace yk {
 		bool InitializePeerConnection();
 		bool CreatePeerConnection();
 
+		void AddTracks();
+
 		std::unique_ptr<rtc::Thread> signaling_thread_ = nullptr;
 		rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_ = nullptr;
 		rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_ = nullptr;

@@ -1,13 +1,13 @@
 ﻿cmake_minimum_required(VERSION 3.1.0)
 
 project(webrtc_client_01 VERSION 1.0.1)
-
+include(env.cmake)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-include(env.cmake)
 
-#set(CMAKE_PREFIX_PATH ${QT_ROOT}/lib/cmake)
+
+set(CMAKE_PREFIX_PATH ${QT_ROOT}/lib/cmake)
 
 
 
@@ -32,6 +32,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #add_compile_definitions(ASIO2_ENABLE_SSL ASIO2_ENABLE_LOG)
 
 add_definitions(-DUNICODE -D_UNICODE -DWIN32_LEAN_AND_MEAN)
+
+add_definitions(-DQT_NO_KEYWORDS)
 
 add_subdirectory(3rdparty)
 
@@ -78,6 +80,9 @@ set(client_SOURCES
 	#client/ui/main_window.cpp
 	client/rtc/rtc_manager.cpp
 	client/rtc/defaults.cpp
+	client/rtc/defaults.cpp
+	client/rtc/test_video_capturer.cc
+	client/rtc/vcm_capturer.cc
 )
 
 set(server_SOURCES
@@ -126,9 +131,11 @@ SET_TARGET_PROPERTIES(rtc_client PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level=\'r
 
 #target_link_libraries(${PROJECT_NAME} mediasoupclient)
 
-#target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets webrtc)
+target_link_libraries(rtc_client  spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets webrtc)
 
-target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 webrtc)
+#target_link_libraries(rtc_client PRIVATE QT_NO_KEYWORDS)
+
+#target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 webrtc)
 
 #target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets)
 

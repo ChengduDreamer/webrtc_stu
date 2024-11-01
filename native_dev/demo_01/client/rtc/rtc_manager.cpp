@@ -8,6 +8,8 @@
 #include <vector>
 #include <iostream>
 
+#include <dshow.h>
+
 #include "absl/memory/memory.h"
 #include "absl/types/optional.h"
 #include "api/audio/audio_mixer.h"
@@ -41,9 +43,49 @@
 #include "rtc_base/logging.h"
 #include "rtc_base/rtc_certificate_generator.h"
 //#include "rtc_base/strings/json.h"
-#include "test/vcm_capturer.h"
+#include "vcm_capturer.h"
+
+#pragma comment(lib, "strmiids.lib")
 
 namespace yk {
+
+    class CapturerTrackSource : public webrtc::VideoTrackSource {
+    public:
+        static rtc::scoped_refptr<CapturerTrackSource> Create() {
+            const size_t kWidth = 640;
+            const size_t kHeight = 480;
+            const size_t kFps = 30;
+            std::unique_ptr<webrtc::test::VcmCapturer> capturer;
+            std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
+                webrtc::VideoCaptureFactory::CreateDeviceInfo());
+            if (!info) {
+                return nullptr;
+            }
+            int num_devices = info->NumberOfDevices();
+            for (int i = 0; i < num_devices; ++i) {
+                capturer = absl::WrapUnique(
+                    webrtc::test::VcmCapturer::Create(kWidth, kHeight, kFps, i));
+                if (capturer) {
+                    return rtc::make_ref_counted<CapturerTrackSource>(std::move(capturer));
+                }
+            }
+
+            return nullptr;
+        }
+
+    protected:
+        explicit CapturerTrackSource(
+            std::unique_ptr<webrtc::test::VcmCapturer> capturer)
+            : VideoTrackSource(/*remote=*/false), capturer_(std::move(capturer)) {}
+
+    private:
+        rtc::VideoSourceInterface<webrtc::VideoFrame>* source() override {
+            return capturer_.get();
+        }
+        std::unique_ptr<webrtc::test::VcmCapturer> capturer_;
+    };
+
+
 
 	RtcManager::RtcManager() {
 
@@ -104,7 +146,45 @@ namespace yk {
         return peer_connection_ != nullptr;
     }
 
+    void RtcManager::AddTracks() {
+        if (!peer_connection_->GetSenders().empty()) {
+            return;  // Already added tracks.
+        }
 
+        rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
+            peer_connection_factory_->CreateAudioTrack(
+                kAudioLabel,
+                peer_connection_factory_->CreateAudioSource(cricket::AudioOptions())
+                .get()));
+        auto result_or_error = peer_connection_->AddTrack(audio_track, { kStreamId });
+        if (!result_or_error.ok()) {
+            RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "
+                << result_or_error.error().message();
+        }
+
+        rtc::scoped_refptr<CapturerTrackSource> video_device =
+            CapturerTrackSource::Create();
+        if (video_device) {
+            rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
+                peer_connection_factory_->CreateVideoTrack(video_device, kVideoLabel));
+
+
+            //video_track_.get();
+
+            //main_wnd_->StartLocalRenderer(video_track_.get());
+
+            result_or_error = peer_connection_->AddTrack(video_track_, { kStreamId });
+            if (!result_or_error.ok()) {
+                RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
+                    << result_or_error.error().message();
+            }
+        }
+        else {
+            RTC_LOG(LS_ERROR) << "OpenVideoCaptureDevice failed";
+        }
+
+        //main_wnd_->SwitchToStreamingUI();
+    }
 
     //
     // PeerConnectionObserver implementation.
