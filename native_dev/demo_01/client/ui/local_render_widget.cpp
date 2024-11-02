@@ -1,6 +1,9 @@
 #include "local_render_widget.h"
 #include <iostream>
 #include <fstream>
+#include <mutex>
+#include <libyuv.h>
+#include <qimage.h>
 #include "api/video/i420_buffer.h"
 #include "rtc/defaults.h"
 #include "rtc_base/arraysize.h"
@@ -9,6 +12,10 @@
 //#include "third_party/libyuv/include/libyuv/convert_argb.h"
 
 namespace yk {
+
+    static std::unique_ptr<uint8_t[]> s_argb_data = nullptr;
+
+    static std::mutex argb_mutex_;
 
     // 将I420Buffer中的YUV数据写入文件
     void WriteYUVToFile(const webrtc::I420BufferInterface* buffer, const std::string& filename) {
@@ -102,23 +109,54 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
             //SetSize(buffer->width(), buffer->height());
            
             //RTC_DCHECK(image_.get() != NULL);
-            //libyuv::I420ToARGB(buffer->DataY(), buffer->StrideY(), buffer->DataU(), buffer->StrideU(), buffer->DataV(), buffer->StrideV(), image_.get(), 
-            //                bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8, buffer->width(), buffer->height());
 
+            //auto destRGBA = GMemoryPool->UniqueAlloc(frame->width * frame->height * 4);
+
+            auto rgb_buffer = std::make_unique<uint8_t[]>(buffer->width() * buffer->height() *4);  // 这里到底是rgba 还是 argb
+
+            libyuv::I420ToARGB(buffer->DataY(), buffer->StrideY(), buffer->DataU(), buffer->StrideU(), buffer->DataV(), buffer->StrideV(), rgb_buffer.get(),
+                buffer->width() * 4, buffer->width(), buffer->height());
+            // 这里为什么是宽度 * 4 需要研究下
+
+            std::lock_guard<std::mutex> lck{ argb_mutex_ };
+            s_argb_data = std::move(rgb_buffer);
 
             // 将YUV数据写入文件
-            WriteYUVToFile(buffer.get(), "output.yuv");
+            //WriteYUVToFile(buffer.get(), "output.yuv");
         }
         //InvalidateRect(wnd_, NULL, TRUE);
     }
 
 
 
+    RenderImplWidget::RenderImplWidget(QWidget* parent) : QWidget(parent) {
+    
+    }
+
+    RenderImplWidget::~RenderImplWidget() {
+    
+    }
+
+    void RenderImplWidget::paintEvent(QPaintEvent* event)  {
+        QPainter painter(this);
+
+
+        std::lock_guard<std::mutex> lck{ argb_mutex_ };
+        if (!s_argb_data) {
+            QWidget::paintEvent(event);
+        }
+        // 创建QImage并从RGB数据中填充像素
+        QImage image(s_argb_data.get(), 3840, 2160, QImage::Format_ARGB32);
+
+        // 将QImage绘制到QWidget上
+        painter.drawImage(0, 0, image);
+    }
+
 	LocalRenderWidget::LocalRenderWidget(QWidget* parent) : QWidget(parent) {
 		
-		render_impl_widget = new QWidget(this);
+		render_impl_widget = new RenderImplWidget(this);
 
-        render_impl_widget->setFixedSize(800, 600);
+        render_impl_widget->setFixedSize(3840, 2160);
 
 	}
 

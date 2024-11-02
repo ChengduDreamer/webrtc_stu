@@ -10,3 +10,6 @@
 [submodule "native_dev/client_01/3rdparty/boost"]
 	path = native_dev/demo_01/3rdparty/boost
 	url = https://github.com/boostorg/boost.git
+[submodule "native_dev/demo_01/3rdparty/libyuv"]
+	path = native_dev/demo_01/3rdparty/libyuv
+	url = https://github.com/lemenkov/libyuv.git

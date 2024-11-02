@@ -1,5 +1,7 @@
 #pragma once
 #include <qwidget.h>
+#include <qpainter.h>
+#include <qevent.h>
 
 #include "api/media_stream_interface.h"
 #include "api/video/video_frame.h"
@@ -48,6 +50,15 @@ namespace yk {
     };
 
 
+    class RenderImplWidget : public QWidget {
+    public:
+        RenderImplWidget(QWidget* parent = nullptr);
+        ~RenderImplWidget();
+        void paintEvent(QPaintEvent*) override;
+
+       
+    };
+
 	class LocalRenderWidget : public QWidget {
 	public:
 		LocalRenderWidget(QWidget* parent = nullptr);
@@ -55,7 +66,7 @@ namespace yk {
 
         virtual void StartLocalRenderer(webrtc::VideoTrackInterface* local_video);
 
-		QWidget* render_impl_widget = nullptr;
+        RenderImplWidget* render_impl_widget = nullptr;
 
         std::unique_ptr<VideoRenderer> local_renderer_;
 	};

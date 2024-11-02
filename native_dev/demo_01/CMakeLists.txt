@@ -56,8 +56,10 @@ include_directories(${CMAKE_SOURCE_DIR}
 					${CMAKE_SOURCE_DIR}/3rdparty/asio2/include
 					${CMAKE_SOURCE_DIR}/3rdparty/asio2/3rd
 					${CMAKE_SOURCE_DIR}/3rdparty
+					${CMAKE_SOURCE_DIR}/3rdparty/libyuv/include
 					${LIBWEBRTC_INCLUDE_PATH}/third_party/abseil-cpp
 					${LIBWEBRTC_INCLUDE_PATH}
+
 					
 )
 
