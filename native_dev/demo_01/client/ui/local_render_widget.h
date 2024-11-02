@@ -2,7 +2,7 @@
 #include <qwidget.h>
 #include <qpainter.h>
 #include <qevent.h>
-
+#include <functional>
 #include "api/media_stream_interface.h"
 #include "api/video/video_frame.h"
 #include "examples/peerconnection/client/peer_connection_client.h"
@@ -14,7 +14,7 @@
 
 namespace yk {
 
-    class VideoRenderer : public rtc::VideoSinkInterface<webrtc::VideoFrame> {
+    class VideoRenderer : public rtc::VideoSinkInterface<webrtc::VideoFrame>{
     public:
         VideoRenderer(HWND wnd,
             int width,
@@ -32,7 +32,12 @@ namespace yk {
        // const BITMAPINFO& bmi() const { return bmi_; }
        // const uint8_t* image() const { return image_.get(); }
 
+        std::function<void(void)> on_frame_cbk = nullptr;
 
+        void SetOnFrameCallback(std::function<void(void)>&& cbk) {
+        
+            on_frame_cbk = std::move(cbk);
+        }
 
     protected:
         void SetSize(int width, int height);

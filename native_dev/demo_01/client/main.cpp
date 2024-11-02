@@ -80,6 +80,9 @@ int main(int argc, char* argv[]) {
 
 	rtc_manager->AddTracks();
 
+	
+	rtc_manager->CreateOffer();
+
 	//MainWindow main_window{ ctx };
 	//main_window.show();
 	//

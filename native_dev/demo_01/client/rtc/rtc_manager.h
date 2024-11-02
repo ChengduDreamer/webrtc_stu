@@ -2,6 +2,15 @@
 
 #include <api/media_stream_interface.h>
 #include <api/peer_connection_interface.h>
+#include "rtc_base/thread.h"
+
+
+#include "api/async_dns_resolver.h"
+#include "api/task_queue/pending_task_safety_flag.h"
+#include "rtc_base/net_helpers.h"
+#include "rtc_base/physical_socket_server.h"
+#include "rtc_base/third_party/sigslot/sigslot.h"
+#include "rtc_base/ref_count.h"
 
 class QWidget;
 
@@ -25,7 +34,7 @@ namespace yk {
 	class RtcManager
 					: public webrtc::PeerConnectionObserver
 						//public PeerConnectionClientObserver
-					   //public webrtc::CreateSessionDescriptionObserver
+					   , public webrtc::CreateSessionDescriptionObserver
 	{
 	public:
 		RtcManager();
@@ -37,6 +46,9 @@ namespace yk {
 		void AddTracks();
 
 		void SetLocalRenderWidget(QWidget* w);
+
+		void CreateOffer();
+
 
 		QWidget* loacl_render_widget_ = nullptr;
 
@@ -68,6 +80,29 @@ namespace yk {
 		void OnIceCandidate(const webrtc::IceCandidateInterface* candidate) override;
 		void OnIceConnectionReceivingChange(bool receiving) override {}
 
+
+		// CreateSessionDescriptionObserver implementation.
+		void OnSuccess(webrtc::SessionDescriptionInterface* desc) override;
+		void OnFailure(webrtc::RTCError error) override;
+
+
+		// RefCountInterface imple //不知道为什么官方demo中 就没实现这两个虚函数
+		mutable webrtc::webrtc_impl::RefCounter ref_count_{ 0 };
+		bool HasOneRef() const 
+		{ 
+			return ref_count_.HasOneRef(); 
+		}
+		void AddRef() const override 
+		{ 
+			ref_count_.IncRef(); 
+		}
+		rtc::RefCountReleaseStatus Release() const override {
+			const auto status = ref_count_.DecRef();
+			if (status == rtc::RefCountReleaseStatus::kDroppedLastRef) {
+				//delete this; // to do  这里先注释掉 不然会析构此对象
+			}
+			return status;
+		}
 	};
 
 }

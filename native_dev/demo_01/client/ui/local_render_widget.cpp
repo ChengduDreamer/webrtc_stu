@@ -17,7 +17,7 @@ namespace yk {
 
     static std::mutex argb_mutex_;
 
-    // ½«I420BufferÖĞµÄYUVÊı¾İĞ´ÈëÎÄ¼ş
+    // å°†I420Bufferä¸­çš„YUVæ•°æ®å†™å…¥æ–‡ä»¶
     void WriteYUVToFile(const webrtc::I420BufferInterface* buffer, const std::string& filename) {
         std::ofstream outputFile(filename, std::ios::app | std::ios::binary);
 
@@ -42,10 +42,10 @@ namespace yk {
             }
 
             outputFile.close();
-            std::cout << "YUVÊı¾İÒÑ³É¹¦Ğ´ÈëÎÄ¼ş '" << filename << "'." << std::endl;
+            std::cout << "YUVæ•°æ®å·²æˆåŠŸå†™å…¥æ–‡ä»¶ '" << filename << "'." << std::endl;
         }
         else {
-            std::cerr << "ÎŞ·¨´ò¿ªÎÄ¼şÒÔĞ´ÈëÊı¾İ¡£" << std::endl;
+            std::cerr << "æ— æ³•æ‰“å¼€æ–‡ä»¶ä»¥å†™å…¥æ•°æ®ã€‚" << std::endl;
         }
     }
 
@@ -83,28 +83,28 @@ namespace yk {
     }
 
     void VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
-        std::cout << "OnFrame" << std::endl;
+       // std::cout << "OnFrame" << std::endl;
 
 
         {
            // AutoLock<VideoRenderer> lock(this);
            //
            /*
-ÔÚÕâ¶Î´úÂëÖĞ£¬¶¨ÒåÁËÒ»¸öÃ¶¾ÙÀàĞÍVideoRotation£¬ÓÃÓÚ±íÊ¾ÊÓÆµĞı×ªµÄ½Ç¶È£¬°üÀ¨kVideoRotation_0£¨0¶È£©¡¢kVideoRotation_90£¨90¶È£©¡¢kVideoRotation_180£¨180¶È£©ºÍkVideoRotation_270£¨270¶È£©¡£
-rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_buffer()->ToI420());ÕâĞĞ´úÂë´´½¨ÁËÒ»¸öI420¸ñÊ½µÄÊÓÆµ»º³åÇø£¬²¢´æ´¢ÔÚbufferÖĞ¡£
-½Ó×Å£¬if (video_frame.rotation() != webrtc::kVideoRotation_0)ÕâĞĞ´úÂë¼ì²éÊÓÆµÖ¡µÄĞı×ª½Ç¶ÈÊÇ·ñ²»µÈÓÚ0¶È£¬Èç¹ûĞèÒªĞı×ªÊÓÆµÖ¡£¬ÔòÖ´ĞĞÏÂÃæµÄ²Ù×÷¡£
-ÔÚĞı×ªÊÓÆµÖ¡µÄ²¿·Ö£¬Ê¹ÓÃwebrtc::I420Buffer::Rotate(*buffer, video_frame.rotation())À´Ğı×ªÊÓÆµÖ¡¡£Õâ¸ö·½·¨¸ù¾İ¸ø¶¨µÄĞı×ª½Ç¶ÈÀ´Ğı×ªÊÓÆµÖ¡µÄÏñËØÊı¾İ¡£
+åœ¨è¿™æ®µä»£ç ä¸­ï¼Œå®šä¹‰äº†ä¸€ä¸ªæšä¸¾ç±»å‹VideoRotationï¼Œç”¨äºè¡¨ç¤ºè§†é¢‘æ—‹è½¬çš„è§’åº¦ï¼ŒåŒ…æ‹¬kVideoRotation_0ï¼ˆ0åº¦ï¼‰ã€kVideoRotation_90ï¼ˆ90åº¦ï¼‰ã€kVideoRotation_180ï¼ˆ180åº¦ï¼‰å’ŒkVideoRotation_270ï¼ˆ270åº¦ï¼‰ã€‚
+rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_buffer()->ToI420());è¿™è¡Œä»£ç åˆ›å»ºäº†ä¸€ä¸ªI420æ ¼å¼çš„è§†é¢‘ç¼“å†²åŒºï¼Œå¹¶å­˜å‚¨åœ¨bufferä¸­ã€‚
+æ¥ç€ï¼Œif (video_frame.rotation() != webrtc::kVideoRotation_0)è¿™è¡Œä»£ç æ£€æŸ¥è§†é¢‘å¸§çš„æ—‹è½¬è§’åº¦æ˜¯å¦ä¸ç­‰äº0åº¦ï¼Œå¦‚æœéœ€è¦æ—‹è½¬è§†é¢‘å¸§ï¼Œåˆ™æ‰§è¡Œä¸‹é¢çš„æ“ä½œã€‚
+åœ¨æ—‹è½¬è§†é¢‘å¸§çš„éƒ¨åˆ†ï¼Œä½¿ç”¨webrtc::I420Buffer::Rotate(*buffer, video_frame.rotation())æ¥æ—‹è½¬è§†é¢‘å¸§ã€‚è¿™ä¸ªæ–¹æ³•æ ¹æ®ç»™å®šçš„æ—‹è½¬è§’åº¦æ¥æ—‹è½¬è§†é¢‘å¸§çš„åƒç´ æ•°æ®ã€‚
            */
 
 
             rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
                 video_frame.video_frame_buffer()->ToI420());
-            if (video_frame.rotation() != webrtc::kVideoRotation_0) {   // VideoRotation ÊÇÊ²Ã´
+            if (video_frame.rotation() != webrtc::kVideoRotation_0) {   // VideoRotation æ˜¯ä»€ä¹ˆ
                 buffer = webrtc::I420Buffer::Rotate(*buffer, video_frame.rotation());
             }
             
 
-            std::cout << "buffer->width() = " << buffer->width() << " buffer->height() = " << buffer->height() << std::endl;
+           // std::cout << "buffer->width() = " << buffer->width() << " buffer->height() = " << buffer->height() << std::endl;
 
             //SetSize(buffer->width(), buffer->height());
            
@@ -112,16 +112,21 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
 
             //auto destRGBA = GMemoryPool->UniqueAlloc(frame->width * frame->height * 4);
 
-            auto rgb_buffer = std::make_unique<uint8_t[]>(buffer->width() * buffer->height() *4);  // ÕâÀïµ½µ×ÊÇrgba »¹ÊÇ argb
+            auto rgb_buffer = std::make_unique<uint8_t[]>(buffer->width() * buffer->height() *4);  // è¿™é‡Œåˆ°åº•æ˜¯rgba è¿˜æ˜¯ argb
 
             libyuv::I420ToARGB(buffer->DataY(), buffer->StrideY(), buffer->DataU(), buffer->StrideU(), buffer->DataV(), buffer->StrideV(), rgb_buffer.get(),
                 buffer->width() * 4, buffer->width(), buffer->height());
-            // ÕâÀïÎªÊ²Ã´ÊÇ¿í¶È * 4 ĞèÒªÑĞ¾¿ÏÂ
+            // è¿™é‡Œä¸ºä»€ä¹ˆæ˜¯å®½åº¦ * 4 éœ€è¦ç ”ç©¶ä¸‹
 
             std::lock_guard<std::mutex> lck{ argb_mutex_ };
             s_argb_data = std::move(rgb_buffer);
 
-            // ½«YUVÊı¾İĞ´ÈëÎÄ¼ş
+            if (on_frame_cbk) {
+                on_frame_cbk();
+            }
+
+
+            // å°†YUVæ•°æ®å†™å…¥æ–‡ä»¶
             //WriteYUVToFile(buffer.get(), "output.yuv");
         }
         //InvalidateRect(wnd_, NULL, TRUE);
@@ -145,10 +150,10 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
         if (!s_argb_data) {
             QWidget::paintEvent(event);
         }
-        // ´´½¨QImage²¢´ÓRGBÊı¾İÖĞÌî³äÏñËØ
+        // åˆ›å»ºQImageå¹¶ä»RGBæ•°æ®ä¸­å¡«å……åƒç´ 
         QImage image(s_argb_data.get(), 3840, 2160, QImage::Format_ARGB32);
 
-        // ½«QImage»æÖÆµ½QWidgetÉÏ
+        // å°†QImageç»˜åˆ¶åˆ°QWidgetä¸Š
         painter.drawImage(0, 0, image);
     }
 
@@ -168,5 +173,13 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
 
     void LocalRenderWidget::StartLocalRenderer(webrtc::VideoTrackInterface* local_video) {
         local_renderer_.reset(new VideoRenderer((HWND)render_impl_widget->winId(), 1, 1, local_video));
+
+        local_renderer_->SetOnFrameCallback([=]() {
+            QMetaObject::invokeMethod(this, [=]() {
+                render_impl_widget->update();
+            });
+        });
+
+  
     }
 }

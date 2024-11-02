@@ -51,6 +51,20 @@
 
 namespace yk {
 
+    class DummySetSessionDescriptionObserver
+        : public webrtc::SetSessionDescriptionObserver {
+    public:
+        static rtc::scoped_refptr<DummySetSessionDescriptionObserver> Create() {
+            return rtc::make_ref_counted<DummySetSessionDescriptionObserver>();
+        }
+        virtual void OnSuccess() { RTC_LOG(LS_INFO) << __FUNCTION__; }
+        virtual void OnFailure(webrtc::RTCError error) {
+            RTC_LOG(LS_INFO) << __FUNCTION__ << " " << ToString(error.type()) << ": "
+                << error.message();
+        }
+    };
+
+
     class CapturerTrackSource : public webrtc::VideoTrackSource {
     public:
         static rtc::scoped_refptr<CapturerTrackSource> Create() {
@@ -235,5 +249,50 @@ namespace yk {
 
     void RtcManager::SetLocalRenderWidget(QWidget* w) {
         loacl_render_widget_ = w;
+    }
+
+
+    void RtcManager::CreateOffer() {
+        
+        peer_connection_->CreateOffer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+    }
+
+    void RtcManager::OnSuccess(webrtc::SessionDescriptionInterface* desc) {
+        peer_connection_->SetLocalDescription(
+            DummySetSessionDescriptionObserver::Create().get(), desc);
+
+        std::string sdp;
+        desc->ToString(&sdp);
+
+        std::cout << "local sdp : " << sdp << std::endl;
+
+        // For loopback test. To save some connecting delay.
+        //if (loopback_) {
+        //    // Replace message type from "offer" to "answer"
+        //    std::unique_ptr<webrtc::SessionDescriptionInterface> session_description =
+        //        webrtc::CreateSessionDescription(webrtc::SdpType::kAnswer, sdp);
+        //    peer_connection_->SetRemoteDescription(
+        //        DummySetSessionDescriptionObserver::Create().get(),
+        //        session_description.release());
+        //    return;
+        //}
+        //
+        //Json::Value jmessage;
+        //jmessage[kSessionDescriptionTypeName] =
+        //    webrtc::SdpTypeToString(desc->GetType());
+        //jmessage[kSessionDescriptionSdpName] = sdp;
+        //
+        //Json::StreamWriterBuilder factory;
+        //SendMessage(Json::writeString(factory, jmessage));
+
+
+
+        std::cout << "local sdp type : " << webrtc::SdpTypeToString(desc->GetType()) << std::endl;  //offer
+
+
+    }
+
+    void RtcManager::OnFailure(webrtc::RTCError error) {
+        RTC_LOG(LS_ERROR) << ToString(error.type()) << ": " << error.message();
     }
 }
