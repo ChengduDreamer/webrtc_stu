@@ -45,6 +45,8 @@
 //#include "rtc_base/strings/json.h"
 #include "vcm_capturer.h"
 
+#include "ui/local_render_widget.h"
+
 #pragma comment(lib, "strmiids.lib")
 
 namespace yk {
@@ -162,8 +164,7 @@ namespace yk {
                 << result_or_error.error().message();
         }
 
-        rtc::scoped_refptr<CapturerTrackSource> video_device =
-            CapturerTrackSource::Create();
+        rtc::scoped_refptr<CapturerTrackSource> video_device = CapturerTrackSource::Create();
         if (video_device) {
             rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
                 peer_connection_factory_->CreateVideoTrack(video_device, kVideoLabel));
@@ -172,6 +173,9 @@ namespace yk {
             //video_track_.get();
 
             //main_wnd_->StartLocalRenderer(video_track_.get());
+
+            dynamic_cast<LocalRenderWidget*>(loacl_render_widget_)->StartLocalRenderer(video_track_.get());
+
 
             result_or_error = peer_connection_->AddTrack(video_track_, { kStreamId });
             if (!result_or_error.ok()) {
@@ -227,5 +231,9 @@ namespace yk {
 
         //Json::StreamWriterBuilder factory;
         //SendMessage(Json::writeString(factory, jmessage));
+    }
+
+    void RtcManager::SetLocalRenderWidget(QWidget* w) {
+        loacl_render_widget_ = w;
     }
 }

@@ -78,6 +78,7 @@ set(client_SOURCES
 	client/signals_client.cpp
 	client/web_socket_client.cpp
 	#client/ui/main_window.cpp
+	client/ui/local_render_widget.cpp
 	client/rtc/rtc_manager.cpp
 	client/rtc/defaults.cpp
 	client/rtc/defaults.cpp
@@ -141,36 +142,36 @@ target_link_libraries(rtc_client  spdlog::spdlog_header_only Boost::signals2 Qt6
 
 target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 )
 
-#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-#	add_custom_command(
-#					TARGET rtc_client
-#					POST_BUILD
-#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_client.exe
-#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#	)
-#else()
-#	add_custom_command(
-#					TARGET rtc_client
-#					POST_BUILD
-#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_client.exe
-#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#	)
-#endif()
-#
-#
-#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-#	add_custom_command(
-#					TARGET rtc_server
-#					POST_BUILD
-#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_server.exe
-#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#	)
-#else()
-#	add_custom_command(
-#					TARGET rtc_server
-#					POST_BUILD
-#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_server.exe
-#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#	)
-#endif()
-#
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_custom_command(
+					TARGET rtc_client
+					POST_BUILD
+					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_client.exe
+					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	)
+else()
+	add_custom_command(
+					TARGET rtc_client
+					POST_BUILD
+					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_client.exe
+					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	)
+endif()
+
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_custom_command(
+					TARGET rtc_server
+					POST_BUILD
+					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_server.exe
+					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	)
+else()
+	add_custom_command(
+					TARGET rtc_server
+					POST_BUILD
+					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_server.exe
+					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	)
+endif()
+

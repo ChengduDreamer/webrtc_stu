@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <qapplication.h>
-
+#include <qwidget.h>
 //#include <absl/flags/parse.h>
 //#include <rtc_base/ssl_adapter.h>
 //#include <rtc_base/win32_socket_init.h>
@@ -29,6 +29,7 @@
 //#include "settings.h"
 
 #include "rtc/rtc_manager.h"
+#include "ui/local_render_widget.h"
 
 
 #pragma comment(lib, "winmm.lib ")
@@ -70,6 +71,14 @@ int main(int argc, char* argv[]) {
 		std::cout << "CreatePeerConnection error" << std::endl;
 		return -1;
 	}
+
+	auto local_render_widget = new LocalRenderWidget();
+	local_render_widget->show();
+
+	rtc_manager->SetLocalRenderWidget(local_render_widget);
+
+
+	rtc_manager->AddTracks();
 
 	//MainWindow main_window{ ctx };
 	//main_window.show();

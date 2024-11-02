@@ -3,6 +3,8 @@
 #include <api/media_stream_interface.h>
 #include <api/peer_connection_interface.h>
 
+class QWidget;
+
 namespace yk {
 
 
@@ -33,6 +35,10 @@ namespace yk {
 		bool CreatePeerConnection();
 
 		void AddTracks();
+
+		void SetLocalRenderWidget(QWidget* w);
+
+		QWidget* loacl_render_widget_ = nullptr;
 
 		std::unique_ptr<rtc::Thread> signaling_thread_ = nullptr;
 		rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_ = nullptr;
