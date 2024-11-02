@@ -159,19 +159,19 @@ else()
 endif()
 
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_custom_command(
-					TARGET rtc_server
-					POST_BUILD
-					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_server.exe
-					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	)
-else()
-	add_custom_command(
-					TARGET rtc_server
-					POST_BUILD
-					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_server.exe
-					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	)
-endif()
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+#	add_custom_command(
+#					TARGET rtc_server
+#					POST_BUILD
+#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --debug rtc_server.exe
+#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#	)
+#else()
+#	add_custom_command(
+#					TARGET rtc_server
+#					POST_BUILD
+#					COMMAND ${QT_ROOT}/bin/windeployqt.exe --release rtc_server.exe
+#					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#	)
+#endif()
 
