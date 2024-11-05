@@ -19,7 +19,7 @@ namespace yk {
 		auto settings = Settings::GetInstance();
 		ws_ptr_ = WebSocketClient::Make("client_" + settings->client_id);
 		if (!ws_ptr_->Connect(*ctx_ptr_->GetIoPool().get(), "127.0.0.1", "21365", "/")) {
-			LogE("SignalsClient ws connect error.");
+			YK_LOGE("SignalsClient ws connect error.");
 		}
 		// to do ÐÄÌø
 	}

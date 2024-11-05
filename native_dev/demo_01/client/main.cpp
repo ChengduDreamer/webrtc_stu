@@ -25,8 +25,9 @@
 #include "web_socket_client.h"
 #include "context.h"
 #include "common/common.h"
-//#include "ui/main_window.h"
+#include "ui/main_window.h"
 //#include "settings.h"
+#include "yk_logger.h"
 
 #include "rtc/rtc_manager.h"
 #include "ui/local_render_widget.h"
@@ -43,7 +44,8 @@ using namespace yk;
 // client 
 int main(int argc, char* argv[]) {
 	QApplication app(argc, argv);
-	std::cout << "start ..." << std::endl;
+	
+	YK_LOGI("client start...");
 
 	rtc::WinsockInitializer winsock_init;
 	rtc::PhysicalSocketServer ss;
@@ -72,20 +74,20 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	auto local_render_widget = new LocalRenderWidget();
-	local_render_widget->show();
-
-	rtc_manager->SetLocalRenderWidget(local_render_widget);
-
-
-	rtc_manager->AddTracks();
-
-	
-	rtc_manager->CreateOffer();
-
-	//MainWindow main_window{ ctx };
-	//main_window.show();
+	//auto local_render_widget = new LocalRenderWidget();
+	//local_render_widget->show();
 	//
+	//rtc_manager->SetLocalRenderWidget(local_render_widget);
+	//
+	//
+	//rtc_manager->AddTracks();
+	//
+	//
+	//rtc_manager->CreateOffer();
+
+	MainWindow main_window{ ctx };
+	main_window.show();
+	
 	app.exec();
 	return 0;
 }

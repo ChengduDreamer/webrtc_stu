@@ -1,4 +1,4 @@
-set(QT_ROOT C:/Qt/6.7.0/msvc2019_64)
+set(QT_ROOT D:/Qt6/6.8.0/msvc2022_64)
 #安装包需要的路径参数, 需要设置为本机实际路径
 set(YK_7Z_PATH "F:/Program Files/7-Zip")
 set(YK_NSIS_PATH "F:/newNSIS3.06.1") 

@@ -159,10 +159,14 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
 
 	LocalRenderWidget::LocalRenderWidget(QWidget* parent) : QWidget(parent) {
 		
-		render_impl_widget = new RenderImplWidget(this);
+	  	render_impl_widget = new RenderImplWidget(this);
 
-        render_impl_widget->setFixedSize(3840, 2160);
+       // render_impl_widget->setFixedSize(3840, 2160);
+        //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+        setStyleSheet(".QWidget {border: 1px solid #000000;}");
+
+        setFixedSize(600, 400);
 	}
 
 

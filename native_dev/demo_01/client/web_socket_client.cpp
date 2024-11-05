@@ -25,17 +25,17 @@ namespace yk {
 						{
 							req.set(http::field::authorization, "websocket-client-authorization");
 						}));
-				LogI("{} ws init.", thiz->name_);
+				YK_LOGI("{} ws init.", thiz->name_);
 			}
 
 		}).bind_connect([weak_thiz = weak_from_this()]() {
 			if (auto thiz = weak_thiz.lock()) {
 				auto ec = asio2::get_last_error();
 				if (ec) {
-					LogE("{} ws connect failure : {} {}", thiz->name_, asio2::last_error_val(), asio2::last_error_msg().c_str());
+					YK_LOGE("{} ws connect failure : {} {}", thiz->name_, asio2::last_error_val(), asio2::last_error_msg().c_str());
 				}
 				else {
-					LogI("{} ws connect success : {} {}", thiz->name_, thiz->ws_client_->remote_address(), thiz->ws_client_->remote_port());
+					YK_LOGI("{} ws connect success : {} {}", thiz->name_, thiz->ws_client_->remote_address(), thiz->ws_client_->remote_port());
 				}
 				thiz->on_connected(ec);
 			}
@@ -43,19 +43,21 @@ namespace yk {
 		}).bind_disconnect([weak_thiz = weak_from_this()]() {
 			if (auto thiz = weak_thiz.lock()) {
 				if (asio2::get_last_error()) {
-					LogE("{} ws disconnect failure : {} {}", thiz->name_, asio2::last_error_val(), asio2::last_error_msg().c_str());
+					YK_LOGE("{} ws disconnect failure : {} {}", thiz->name_, asio2::last_error_val(), asio2::last_error_msg().c_str());
 				}
 				else {
-					LogI("{} ws disconnect success : {} {}", thiz->name_, thiz->ws_client_->remote_address(), thiz->ws_client_->remote_port());
+					YK_LOGI("{} ws disconnect success : {} {}", thiz->name_, thiz->ws_client_->remote_address(), thiz->ws_client_->remote_port());
 					thiz->on_closed();
 				}
 			}
 		}).bind_upgrade([weak_thiz = weak_from_this()]() {
 			if (auto thiz = weak_thiz.lock()) {
-				if (asio2::get_last_error())
-					LogE("{} ws upgrade failure : {} {}", thiz->name_, asio2::last_error_val(), asio2::last_error_msg());
-				else
-					LogI("{} ws upgrade success", thiz->name_);
+				if (asio2::get_last_error()) {
+					YK_LOGE("{} ws upgrade failure : {} {}", thiz->name_, asio2::last_error_val(), asio2::last_error_msg());
+				}
+				else {
+					YK_LOGI("{} ws upgrade success", thiz->name_);
+				}
 			}
 
 		}).bind_recv([weak_thiz = weak_from_this()](std::string_view data) {
@@ -65,7 +67,7 @@ namespace yk {
 		});
 
 		if (!ws_client_->async_start(host, port, path)) {
-			LogE("{} ws connect websocket server failure : {} {}", name_, asio2::last_error_val(), asio2::last_error_msg());
+			YK_LOGE("{} ws connect websocket server failure : {} {}", name_, asio2::last_error_val(), asio2::last_error_msg());
 			return false;
 		}
 		return true;
@@ -77,7 +79,7 @@ namespace yk {
 			ws_client_->set_auto_reconnect(false);
 			//ws_client_->ws_stream().async_close(boost::beast::websocket::close_code::normal, [thiz_weak = weak_from_this()](::bho::beast::error_code ec) {
 			//	if (auto thiz = thiz_weak.lock()) {
-			//		LogI("async close ws client {} session finish. ec msg {}", thiz->name_, ec.message());
+			//		YK_LOGI("async close ws client {} session finish. ec msg {}", thiz->name_, ec.message());
 			//	}
 			//});
 			//ws_client_->ws_stream().close(boost::beast::websocket::close_code::normal);

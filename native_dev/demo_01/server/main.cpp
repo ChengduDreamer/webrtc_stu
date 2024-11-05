@@ -3,6 +3,7 @@
 #include <chrono>
 //#include <qapplication.h>
 #include "signals_server.h"
+#include "yk_logger.h"
 
 // server
 using namespace yk;

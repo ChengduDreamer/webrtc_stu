@@ -112,18 +112,18 @@ namespace yk {
 			jsobj = nlohmann::json::parse(msg);
 		}
 		catch (std::exception& e) {
-			LogE("OnRecvMsg format error!");
+			YK_LOGE("OnRecvMsg format error!");
 			return;
 		}
 		if (!jsobj.contains("operation_type")) {
-			LogE("OnRecvMsg miss operation_type!");
+			YK_LOGE("OnRecvMsg miss operation_type!");
 			return;
 		}
 		const std::string op_type = jsobj["operation_type"].get<std::string>();
 		std::cout << "operation_type = " << op_type << std::endl;
 		if (kSignalsMsgType_Hello == op_type) {
 			if (!jsobj.contains("client_id")) {
-				LogE("OnRecvMsg miss client_id!");
+				YK_LOGE("OnRecvMsg miss client_id!");
 				return;
 			}
 			const std::string client_id = jsobj["client_id"].get<std::string>();

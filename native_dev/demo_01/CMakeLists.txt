@@ -79,8 +79,9 @@ set(client_SOURCES
 	client/context.cpp
 	client/signals_client.cpp
 	client/web_socket_client.cpp
-	#client/ui/main_window.cpp
+	client/ui/main_window.cpp
 	client/ui/local_render_widget.cpp
+	client/ui/remote_render_widget.cpp
 	client/rtc/rtc_manager.cpp
 	client/rtc/defaults.cpp
 	client/rtc/defaults.cpp

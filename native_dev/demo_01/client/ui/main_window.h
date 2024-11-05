@@ -8,11 +8,16 @@ class QVBoxLayout;
 class QHBoxLayout;
 
 
+
 namespace yk {
 
 	class Context;
 
 	class SignalsClient;
+
+	class LocalRenderWidget;
+
+	class RemoteRenderWidget;
 
 	class MainWindow : public QWidget {
 	public:
@@ -23,11 +28,24 @@ namespace yk {
 		void InitQtSignalChannels();
 	private:
 		QVBoxLayout* vbox_main_layout_ = nullptr;
-
-		QHBoxLayout* hbox_layout_ = nullptr;
+		// settings
+		QHBoxLayout* hbox_settings_layout_ = nullptr;
+		QLabel* local_id_lab_ = nullptr;
+		QLineEdit* local_id_edit_ = nullptr;
+		
 		QLabel* addr_lab_ = nullptr;
 		QLineEdit* addr_edit_ = nullptr;
-		QPushButton* connect_btn_ = nullptr;
+		QPushButton* sign_connect_btn_ = nullptr;
+
+		QLabel* remote_id_lab_ = nullptr;
+		QLineEdit* remote_id_edit_ = nullptr;
+
+		QPushButton* call_btn_ = nullptr;
+
+		// render
+		QHBoxLayout* hbox_render_layout_ = nullptr;
+		LocalRenderWidget* local_render_widget_ = nullptr;
+		RemoteRenderWidget* remote_render_widget_ = nullptr;
 
 	private:
 		std::shared_ptr<Context> ctx_ptr_ = nullptr;
