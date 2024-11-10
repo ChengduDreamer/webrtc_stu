@@ -19,6 +19,8 @@ namespace yk {
 
 	class RemoteRenderWidget;
 
+	class RtcManager;
+
 	class MainWindow : public QWidget {
 	public:
 		MainWindow(const std::shared_ptr<Context>& ctx_ptr);
@@ -34,7 +36,8 @@ namespace yk {
 		QLineEdit* local_id_edit_ = nullptr;
 		
 		QLabel* addr_lab_ = nullptr;
-		QLineEdit* addr_edit_ = nullptr;
+		QLineEdit* host_edit_ = nullptr;
+		QLineEdit* port_edit_ = nullptr;
 		QPushButton* sign_connect_btn_ = nullptr;
 
 		QLabel* remote_id_lab_ = nullptr;
@@ -50,6 +53,7 @@ namespace yk {
 	private:
 		std::shared_ptr<Context> ctx_ptr_ = nullptr;
 		std::shared_ptr<SignalsClient> signals_client_ptr_ = nullptr;
+		std::shared_ptr<RtcManager> rtc_manager_ptr_ = nullptr;
 	};
 
 }

@@ -62,7 +62,8 @@ namespace yk {
 
 		}).bind_recv([weak_thiz = weak_from_this()](std::string_view data) {
 			if (auto thiz = weak_thiz.lock()) {
-				thiz->on_message(data);
+				std::string msg = std::string(data);
+				thiz->on_message(msg);
 			}
 		});
 

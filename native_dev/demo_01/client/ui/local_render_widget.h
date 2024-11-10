@@ -12,6 +12,9 @@
 #include "rtc_base/win32.h"
 #endif  // WEBRTC_WIN
 
+
+class GLVideoWidget;
+
 namespace yk {
 
     class VideoRenderer : public rtc::VideoSinkInterface<webrtc::VideoFrame>{
@@ -54,7 +57,7 @@ namespace yk {
         rtc::scoped_refptr<webrtc::VideoTrackInterface> rendered_track_;
     };
 
-
+#if 0
     class RenderImplWidget : public QWidget {
     public:
         RenderImplWidget(QWidget* parent = nullptr);
@@ -63,6 +66,8 @@ namespace yk {
 
        
     };
+#endif
+
 
 	class LocalRenderWidget : public QWidget {
 	public:
@@ -71,7 +76,9 @@ namespace yk {
 
         virtual void StartLocalRenderer(webrtc::VideoTrackInterface* local_video);
 
-        RenderImplWidget* render_impl_widget = nullptr;
+    //    RenderImplWidget* render_impl_widget = nullptr;
+
+        GLVideoWidget* gl_video_widget_ = nullptr;
 
         std::unique_ptr<VideoRenderer> local_renderer_;
 	};

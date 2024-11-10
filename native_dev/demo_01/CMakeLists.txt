@@ -2,6 +2,7 @@
 
 project(webrtc_client_01 VERSION 1.0.1)
 include(env.cmake)
+
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
@@ -37,7 +38,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 add_subdirectory(3rdparty)
 
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets OpenGLWidgets REQUIRED)
 
 if(${CMAKE_SIZEOF_VOID_P} STREQUAL "4")
 	set(PLATFORM_WIN64 FALSE)
@@ -68,6 +69,8 @@ link_directories(
 		${LIBWEBRTC_BINARY_PATH}
 )
 
+#add_subdirectory(client/video-widget)
+
 set(common_SOURCES
 	common/common.cpp
 	common/yk_logger.cpp
@@ -87,7 +90,15 @@ set(client_SOURCES
 	client/rtc/defaults.cpp
 	client/rtc/test_video_capturer.cc
 	client/rtc/vcm_capturer.cc
+
+	client/video-widget/GLImageReader.cpp
+	client/video-widget/GLVideoWidget.cpp
+	client/video-widget/RawImage.cpp
+
+	#${VIDEO_WIDGET_SRCS}
 )
+#message("-----------------------VIDEO_WIDGET_SRCS:")
+#message(${VIDEO_WIDGET_SRCS})
 
 set(server_SOURCES
 	server/main.cpp
@@ -135,7 +146,7 @@ SET_TARGET_PROPERTIES(rtc_client PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level=\'r
 
 #target_link_libraries(${PROJECT_NAME} mediasoupclient)
 
-target_link_libraries(rtc_client  spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets webrtc)
+target_link_libraries(rtc_client spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets Qt6::OpenGLWidgets webrtc)
 
 #target_link_libraries(rtc_client PRIVATE QT_NO_KEYWORDS)
 
@@ -143,7 +154,7 @@ target_link_libraries(rtc_client  spdlog::spdlog_header_only Boost::signals2 Qt6
 
 #target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets)
 
-target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 )
+target_link_libraries(rtc_server spdlog::spdlog_header_only Boost::signals2 Qt6::Widgets)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_custom_command(

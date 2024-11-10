@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <qapplication.h>
+#include <qsurfaceformat.h>
 #include <qwidget.h>
 //#include <absl/flags/parse.h>
 //#include <rtc_base/ssl_adapter.h>
@@ -26,7 +27,7 @@
 #include "context.h"
 #include "common/common.h"
 #include "ui/main_window.h"
-//#include "settings.h"
+#include "settings.h"
 #include "yk_logger.h"
 
 #include "rtc/rtc_manager.h"
@@ -43,6 +44,16 @@
 using namespace yk;
 // client 
 int main(int argc, char* argv[]) {
+
+
+	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+	QSurfaceFormat fmt;
+	//fmt.setVersion(3, 3);
+	fmt.setProfile(QSurfaceFormat::CoreProfile);
+	fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	fmt.setSwapInterval(0);
+	QSurfaceFormat::setDefaultFormat(fmt);
+
 	QApplication app(argc, argv);
 	
 	YK_LOGI("client start...");
@@ -52,12 +63,12 @@ int main(int argc, char* argv[]) {
 	rtc::AutoSocketServerThread main_thread(&ss);
 
 	auto ctx = yk::Context::Make();
-	//Settings::GetInstance()->ParseArgs(app);
+	Settings::GetInstance()->ParseArgs(app);
 
 	rtc::InitializeSSL();
-
+#if 0
 	auto rtc_manager = std::make_shared<RtcManager>();
-
+	
 	if (rtc_manager->InitializePeerConnection()) {
 		std::cout << "InitializePeerConnection ok" << std::endl;
 	}
@@ -65,7 +76,7 @@ int main(int argc, char* argv[]) {
 		std::cout << "InitializePeerConnection error" << std::endl;
 		return -1;
 	}
-
+	
 	if (rtc_manager->CreatePeerConnection()) {
 		std::cout << "CreatePeerConnection ok" << std::endl;
 	}
@@ -74,16 +85,17 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	//auto local_render_widget = new LocalRenderWidget();
-	//local_render_widget->show();
-	//
-	//rtc_manager->SetLocalRenderWidget(local_render_widget);
-	//
-	//
-	//rtc_manager->AddTracks();
-	//
-	//
-	//rtc_manager->CreateOffer();
+	auto local_render_widget = new LocalRenderWidget();
+	local_render_widget->show();
+	
+	rtc_manager->SetLocalRenderWidget(local_render_widget);
+	
+	
+	rtc_manager->AddTracks();
+	
+	
+	rtc_manager->CreateOffer();
+#endif
 
 	MainWindow main_window{ ctx };
 	main_window.show();

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <string>
 #include <asio2/asio2.hpp>
 #include <boost/signals2/signal.hpp>
 
@@ -25,7 +25,7 @@ namespace yk {
 		void set_pending_message_max_count(int count) { pending_message_max_count_ = count; }
 
 		signal<void(asio2::error_code)> on_connected;
-		signal<void(std::string_view)> on_message;
+		signal<void(std::string)> on_message;
 		signal<void()> on_closed;
 		int GetPendingMessgaeCurrentCount() {
 			return pending_messgae_current_count_;

@@ -4,6 +4,7 @@
 #include <map>
 #include <functional>
 #include <asio2/websocket/ws_server.hpp>
+#include <mutex>
 
 namespace yk {
 	using WSOnRecvMsgCallbackFunc = std::function<void(std::string)>;
@@ -15,6 +16,7 @@ namespace yk {
 		~WebSocketServer();
 		void Init();
 		void SetOnRecvMsgCallback(WSOnRecvMsgCallbackFunc&& cbk);
+		void SendMsg(const std::string client_id, const std::string msg);
 	private:
 		void OnRecvMsg(const std::shared_ptr<asio2::ws_session>& session_ptr, std::string msg);
 	private:
@@ -23,6 +25,8 @@ namespace yk {
 		std::string port_ = "21365";
 
 		WSOnRecvMsgCallbackFunc on_recv_msg_callback_ = nullptr;
+
+		std::mutex session_mutex_;
 		std::map<std::string, std::shared_ptr<asio2::ws_session>> client_sessions_;
 	};
 }

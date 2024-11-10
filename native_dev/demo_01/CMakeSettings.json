@@ -7,17 +7,6 @@
   ],
   "configurations": [
     {
-      "name": "x64-Release",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DGENERATE_SETUP=TRUE",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
-    },
-    {
       "name": "x64-RelWithDebInfo",
       "generator": "Ninja",
       "configurationType": "RelWithDebInfo",

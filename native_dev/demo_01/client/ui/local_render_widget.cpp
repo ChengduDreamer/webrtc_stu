@@ -4,11 +4,13 @@
 #include <mutex>
 #include <libyuv.h>
 #include <qimage.h>
+#include <qsizepolicy.h>
 #include "api/video/i420_buffer.h"
 #include "rtc/defaults.h"
 #include "rtc_base/arraysize.h"
 #include "rtc_base/checks.h"
 #include "rtc_base/logging.h"
+#include "video-widget/GLVideoWidget.h"
 //#include "third_party/libyuv/include/libyuv/convert_argb.h"
 
 namespace yk {
@@ -17,9 +19,16 @@ namespace yk {
 
     static std::mutex argb_mutex_;
 
+    static std::shared_ptr<RawImage> s_raw_image = nullptr;
+
+
+    static std::mutex s_yuv_mutex;
+
     // 将I420Buffer中的YUV数据写入文件
     void WriteYUVToFile(const webrtc::I420BufferInterface* buffer, const std::string& filename) {
-        std::ofstream outputFile(filename, std::ios::app | std::ios::binary);
+        //std::ofstream outputFile(filename, std::ios::app | std::ios::binary);
+
+        std::ofstream outputFile(filename, std::ios::out | std::ios::binary);
 
         if (outputFile.is_open()) {
             const uint8_t* dataY = buffer->DataY();
@@ -49,6 +58,21 @@ namespace yk {
         }
     }
 
+
+    void WriteYUVToFile2(const char* data, uint64_t data_size, const std::string& filename) {
+        std::ofstream outputFile(filename, std::ios::app | std::ios::binary);
+
+        //std::ofstream outputFile(filename, std::ios::out | std::ios::binary);
+
+        if (outputFile.is_open()) {
+            outputFile.write(data, data_size);
+            outputFile.close();
+            std::cout << "YUV数据已成功写入文件 '" << filename << "'." << std::endl;
+        }
+        else {
+            std::cerr << "无法打开文件以写入数据。" << std::endl;
+        }
+    }
 
     VideoRenderer::VideoRenderer(HWND wnd, int width, int height, webrtc::VideoTrackInterface* track_to_render) : wnd_(wnd), rendered_track_(track_to_render) {
       //  ::InitializeCriticalSection(&buffer_lock_);
@@ -111,7 +135,9 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
             //RTC_DCHECK(image_.get() != NULL);
 
             //auto destRGBA = GMemoryPool->UniqueAlloc(frame->width * frame->height * 4);
-
+            // 
+#if 0
+            // 将yuv420 转为rgb
             auto rgb_buffer = std::make_unique<uint8_t[]>(buffer->width() * buffer->height() *4);  // 这里到底是rgba 还是 argb
 
             libyuv::I420ToARGB(buffer->DataY(), buffer->StrideY(), buffer->DataU(), buffer->StrideU(), buffer->DataV(), buffer->StrideV(), rgb_buffer.get(),
@@ -124,15 +150,67 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
             if (on_frame_cbk) {
                 on_frame_cbk();
             }
-
-
             // 将YUV数据写入文件
-            //WriteYUVToFile(buffer.get(), "output.yuv");
+            // WriteYUVToFile(buffer.get(), "output.yuv");
+#endif
+            
+
+            int y_size = buffer->width() * buffer->height();
+            int u_size = y_size / 4;
+            int v_size = u_size;
+
+            int total_size = y_size + u_size + v_size;
+            char* img_buf = (char*)malloc(total_size);
+          /*  memcpy(img_buf, video_frame->y, y_size);
+            memcpy(img_buf + y_size, video_frame->u, u_size);
+            memcpy(img_buf + y_size + u_size, video_frame->v, v_size);*/
+
+            const uint8_t* dataY = buffer->DataY();
+            const uint8_t* dataU = buffer->DataU();
+            const uint8_t* dataV = buffer->DataV();
+
+            int strideY = buffer->StrideY();
+            int strideU = buffer->StrideU();
+            int strideV = buffer->StrideV();
+            int width = buffer->width();
+            int height = buffer->height();
+
+            for (int y = 0; y < height; y++) {
+                //outputFile.write(reinterpret_cast<const char*>(&dataY[y * strideY]), width);
+                memcpy(img_buf + y * width, reinterpret_cast<const char*>(&dataY[y * strideY]), width);
+            }
+            for (int y = 0; y < height / 2; y++) {
+                //outputFile.write(reinterpret_cast<const char*>(&dataU[y * strideU]), width / 2);
+
+                memcpy(img_buf + height * width + y * (width / 2), reinterpret_cast<const char*>(&dataU[y * strideU]), width / 2);
+
+            }
+            for (int y = 0; y < height / 2; y++) {
+                //outputFile.write(reinterpret_cast<const char*>(&dataV[y * strideV]), width / 2);
+
+                memcpy(img_buf + height * width  + (height / 2) * (width / 2) + y * (width / 2), reinterpret_cast<const char*>(&dataV[y * strideV]), width / 2);
+            }
+
+            {
+                std::lock_guard<std::mutex> lck{ s_yuv_mutex };
+                s_raw_image = RawImage::MakeI420(img_buf, total_size, buffer->width(), buffer->height());
+            }
+
+          //  WriteYUVToFile2(img_buf, total_size, "output2.yuv");
+
+            free(img_buf);
+
+            if (on_frame_cbk) {
+                on_frame_cbk();
+            }
+
+            
+
         }
         //InvalidateRect(wnd_, NULL, TRUE);
     }
 
-
+#if 0
 
     RenderImplWidget::RenderImplWidget(QWidget* parent) : QWidget(parent) {
     
@@ -156,17 +234,23 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
         // 将QImage绘制到QWidget上
         painter.drawImage(0, 0, image);
     }
-
+#endif
 	LocalRenderWidget::LocalRenderWidget(QWidget* parent) : QWidget(parent) {
-		
+#if 0
 	  	render_impl_widget = new RenderImplWidget(this);
 
        // render_impl_widget->setFixedSize(3840, 2160);
-        //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+//        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+        
+#endif
 
         setStyleSheet(".QWidget {border: 1px solid #000000;}");
-
         setFixedSize(600, 400);
+
+
+        gl_video_widget_ = new GLVideoWidget(RawImageFormat::kI420, this);
+        gl_video_widget_->setFixedSize(600, 400);
 	}
 
 
@@ -176,6 +260,7 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
 
 
     void LocalRenderWidget::StartLocalRenderer(webrtc::VideoTrackInterface* local_video) {
+#if 0
         local_renderer_.reset(new VideoRenderer((HWND)render_impl_widget->winId(), 1, 1, local_video));
 
         local_renderer_->SetOnFrameCallback([=]() {
@@ -183,7 +268,32 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
                 render_impl_widget->update();
             });
         });
+#endif
 
+        QMetaObject::invokeMethod(this, [=]() {
+            local_renderer_.reset(new VideoRenderer((HWND)gl_video_widget_->winId(), 1, 1, local_video));
+
+
+
+            local_renderer_->SetOnFrameCallback([=]() {
+                QMetaObject::invokeMethod(this, [=]() {
+                    //gl_video_widget_->update();
+                    std::lock_guard<std::mutex> lck{ s_yuv_mutex };
+                     gl_video_widget_->UpdateI420Image(s_raw_image);
+                     gl_video_widget_->update();
+
+
+                    std::cout << "local render UpdateI420Image" << std::endl;
+
+                    }, Qt::QueuedConnection);
+                });
+
+            }, Qt::QueuedConnection);
+
+
+        
+
+        
   
     }
 }
