@@ -22,6 +22,7 @@ namespace yk {
 		void ShowAllClientId();
 		void HandleMsg(const std::string msg);
 		void HandleCallMsg(const nlohmann::json& jsobj);
+		void HandleForwardMsg(const nlohmann::json& jsobj);
 		
 
 

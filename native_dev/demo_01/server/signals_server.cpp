@@ -4,6 +4,8 @@
 #include "web_socket_server.h"
 #include "public/signals_def.h"
 #include "room_manager.h"
+#include "common/yk_logger.h"
+
 
 namespace yk {
 
@@ -46,6 +48,9 @@ namespace yk {
 		else if (kSignalsMsgType_Call == op_type) {
 			HandleCallMsg(jsobj);
 		}
+		else if (kSignalsMsgType_Message == op_type) {
+			HandleForwardMsg(jsobj);
+		}
 	}
 
 	void SignalsServer::ShowAllClientId() {
@@ -69,6 +74,41 @@ namespace yk {
 		std::string room_id = RoomManager::Instance()->CreateRoom(caller_client_id, callee_client_id);
 		resp_obj["operation_type"] = kSignalsMsgType_CreatedRoom;
 		resp_obj["room_id"] = room_id;
+
+		YK_LOGI("SignalsServer HandleCallMsg SendMsg to {}, msg is {}", caller_client_id, resp_obj.dump());
+
 		websocket_server_ptr_->SendMsg(caller_client_id, resp_obj.dump());
+
+		//websocket_server_ptr_->SendMsg(callee_client_id, resp_obj.dump());
+	}
+
+
+	void SignalsServer::HandleForwardMsg(const nlohmann::json& jsobj) {
+		
+		try {
+			std::string room_id = jsobj["room_id"].get<std::string>();
+
+			YK_LOGI("HandleForwardMsg room_id: {}", room_id);
+
+			if (room_id.empty()) {
+
+				YK_LOGI("HandleForwardMsg room_id is empty");
+				return;
+			}
+
+			std::string client_id = jsobj["client_id"].get<std::string>();
+
+			auto room = RoomManager::Instance()->GetRoom(room_id);
+
+			if (room->caller_id_ == client_id) {
+				websocket_server_ptr_->SendMsg(room->callee_id_, jsobj.dump());
+			}
+			else if (room->callee_id_ == client_id) {
+				websocket_server_ptr_->SendMsg(room->caller_id_, jsobj.dump());
+			}
+		}
+		catch (std::exception& e) {
+			YK_LOGE("excepiton msg : {}", e.what());
+		}
 	}
 }

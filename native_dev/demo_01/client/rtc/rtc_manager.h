@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <NlohmannJson/json.hpp>
 #include <api/media_stream_interface.h>
 #include <api/peer_connection_interface.h>
 #include "rtc_base/thread.h"
@@ -48,6 +50,10 @@ namespace yk {
 		void SetLocalRenderWidget(QWidget* w);
 
 		void CreateOffer();
+
+		void CreateAnswer();
+
+		void OnMessageFromPeer(const nlohmann::json jsobj);
 
 
 		QWidget* loacl_render_widget_ = nullptr;
@@ -103,6 +109,22 @@ namespace yk {
 			}
 			return status;
 		}
+
+
+		
+
+		                                                        // 
+		using OnCreatedSDPMsgCallbackFunc = std::function<void(std::string content, std::string type)>;
+
+		OnCreatedSDPMsgCallbackFunc on_created_sdp_msg_callback_ = nullptr;
+
+		void SetOnCreatedSDPMsgCallback(OnCreatedSDPMsgCallbackFunc&& cbk) {
+			on_created_sdp_msg_callback_ = std::move(cbk);
+		}
+
+
+
+		void OnRecvOfferFromPeer();
 	};
 
 }

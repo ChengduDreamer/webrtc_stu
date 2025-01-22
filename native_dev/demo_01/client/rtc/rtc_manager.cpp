@@ -47,6 +47,8 @@
 
 #include "ui/local_render_widget.h"
 
+#include "common/yk_logger.h"
+
 #pragma comment(lib, "strmiids.lib")
 
 namespace yk {
@@ -224,6 +226,9 @@ namespace yk {
     }
 
     void RtcManager::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
+
+        YK_LOGI("OnIceCandidate : {}", candidate->sdp_mid());
+
         //RTC_LOG(LS_INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
         //// For loopback test. To save some connecting delay.
         //if (loopback_) {
@@ -257,7 +262,45 @@ namespace yk {
         peer_connection_->CreateOffer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     }
 
-    void RtcManager::OnSuccess(webrtc::SessionDescriptionInterface* desc) {
+    void RtcManager::CreateAnswer() {
+        peer_connection_->CreateAnswer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+    }
+
+
+    // 官方demo中，应该是没有区分具体的 类型，只要是message 就转发过来了，等后续对比下
+    void RtcManager::OnRecvOfferFromPeer() {
+        //absl::optional<webrtc::SdpType> type_maybe =
+        //    webrtc::SdpTypeFromString(type_str);
+        //if (!type_maybe) {
+        //    RTC_LOG(LS_ERROR) << "Unknown SDP type: " << type_str;
+        //    return;
+        //}
+        //webrtc::SdpType type = *type_maybe;
+        //std::string sdp;
+        //if (!rtc::GetStringFromJsonObject(jmessage, kSessionDescriptionSdpName,
+        //    &sdp)) {
+        //    RTC_LOG(LS_WARNING)
+        //        << "Can't parse received session description message.";
+        //    return;
+        //}
+        //webrtc::SdpParseError error;
+        //std::unique_ptr<webrtc::SessionDescriptionInterface> session_description =
+        //    webrtc::CreateSessionDescription(type, sdp, &error);
+        //if (!session_description) {
+        //    RTC_LOG(LS_WARNING)
+        //        << "Can't parse received session description message. "
+        //        "SdpParseError was: "
+        //        << error.description;
+        //    return;
+        //}
+        //RTC_LOG(LS_INFO) << " Received session description :" << message;
+        //peer_connection_->SetRemoteDescription(
+        //    DummySetSessionDescriptionObserver::Create().get(),
+        //    session_description.release());
+    }
+
+    void RtcManager::OnSuccess(webrtc::SessionDescriptionInterface* desc) 
+    {
         peer_connection_->SetLocalDescription(
             DummySetSessionDescriptionObserver::Create().get(), desc);
 
@@ -265,6 +308,15 @@ namespace yk {
         desc->ToString(&sdp);
 
         std::cout << "local sdp : " << sdp << std::endl;
+
+        std::string sdp_type_str = webrtc::SdpTypeToString(desc->GetType());
+
+        std::cout << "local sdp type : " << sdp_type_str << std::endl;  //offer
+ 
+        if (on_created_sdp_msg_callback_) {
+            on_created_sdp_msg_callback_(sdp, sdp_type_str);
+        }
+
 
         // For loopback test. To save some connecting delay.
         //if (loopback_) {
@@ -287,12 +339,75 @@ namespace yk {
 
 
 
-        std::cout << "local sdp type : " << webrtc::SdpTypeToString(desc->GetType()) << std::endl;  //offer
+        
 
 
     }
 
     void RtcManager::OnFailure(webrtc::RTCError error) {
         RTC_LOG(LS_ERROR) << ToString(error.type()) << ": " << error.message();
+    }
+
+
+    void RtcManager::OnMessageFromPeer(const nlohmann::json jsobj) {
+        // to do 这里的判断要改进
+        if (jsobj.contains("sdp_type")) {
+            std::string sdp_type = jsobj["sdp_type"].get<std::string>();
+            std::string sdp = jsobj["content"].get<std::string>();
+            std::string room_id = jsobj["room_id"].get<std::string>();
+
+            absl::optional<webrtc::SdpType> type_maybe =
+                webrtc::SdpTypeFromString(sdp_type);
+            if (!type_maybe) {
+                qDebug() << "Unknown SDP type: " << sdp_type;
+                return;
+            }
+            webrtc::SdpType type = *type_maybe;
+
+            webrtc::SdpParseError error;
+            std::unique_ptr<webrtc::SessionDescriptionInterface> session_description = webrtc::CreateSessionDescription(type, sdp, &error);
+            if (!session_description) {
+                qDebug() << "Can't parse received session description message. SdpParseError was: " << error.description;
+                return;
+            }
+            //qDebug() << " Received session description :" << message;
+            peer_connection_->SetRemoteDescription(DummySetSessionDescriptionObserver::Create().get(), session_description.release());
+            if (type == webrtc::SdpType::kOffer) {
+                AddTracks();
+                peer_connection_->CreateAnswer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+            }
+        }
+        else {
+
+            YK_LOGI("OnMessageFromPeer : {}", jsobj.dump());
+
+
+           /* std::string sdp_mid;
+            int sdp_mlineindex = 0;
+            std::string sdp;
+            if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName, &sdp_mid) || !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,&sdp_mlineindex) ||
+                !rtc::GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
+                RTC_LOG(LS_WARNING) << "Can't parse received message.";
+                return;
+            }
+            webrtc::SdpParseError error;
+            std::unique_ptr<webrtc::IceCandidateInterface> candidate(
+                webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
+            if (!candidate.get()) {
+                RTC_LOG(LS_WARNING) << "Can't parse received candidate message. "
+                    "SdpParseError was: "
+                    << error.description;
+                return;
+            }
+            if (!peer_connection_->AddIceCandidate(candidate.get())) {
+                RTC_LOG(LS_WARNING) << "Failed to apply the received candidate";
+                return;
+            }
+            RTC_LOG(LS_INFO) << " Received candidate :" << message;*/
+            
+        
+        
+        
+        }
     }
 }

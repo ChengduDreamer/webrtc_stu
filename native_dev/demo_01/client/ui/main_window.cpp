@@ -103,6 +103,12 @@ namespace yk {
 
 
 		rtc_manager_ptr_->SetLocalRenderWidget(local_render_widget_);
+
+
+		rtc_manager_ptr_->SetOnCreatedSDPMsgCallback(std::move([=](std::string sdp_str, std::string sdp_type_str) {
+			signals_client_ptr_->SendSDPMsg(sdp_str, sdp_type_str);
+		}));
+		
 	}
 
 	void MainWindow::InitQtSignalChannels() {
@@ -119,6 +125,30 @@ namespace yk {
 				rtc_manager_ptr_->AddTracks();
 				rtc_manager_ptr_->CreateOffer();
 			});
+
+			signals_client_ptr_->SetOnRecvSDPMsgCallback(std::move([=](const nlohmann::json jsobj) {
+
+				if (jsobj.contains("sdp_type")) {
+					std::string sdp_type = jsobj["sdp_type"].get<std::string>();
+					std::string sdp = jsobj["content"].get<std::string>();
+					
+
+					absl::optional<webrtc::SdpType> type_maybe =
+						webrtc::SdpTypeFromString(sdp_type);
+					if (!type_maybe) {
+						qDebug() << "Unknown SDP type: " << sdp_type;
+						return;
+					}
+					webrtc::SdpType type = *type_maybe;
+					if (type == webrtc::SdpType::kOffer) {
+						std::string room_id = jsobj["room_id"].get<std::string>();
+						signals_client_ptr_->room_id_ = room_id;
+					}
+				}
+				rtc_manager_ptr_->OnMessageFromPeer(jsobj);
+
+			}));
+
 		});
 
 		connect(call_btn_, &QPushButton::clicked, this, [=]() {

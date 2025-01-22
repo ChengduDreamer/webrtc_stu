@@ -58,7 +58,6 @@ namespace yk {
 			[=]() {
 				auto settings = Settings::GetInstance();
 				nlohmann::json msg_json;
-				msg_json["room_id"] = "1";
 				msg_json["caller_client_id"] = settings->client_id;
 				msg_json["callee_client_id"] = remote_id;
 				msg_json["operation_type"] = kSignalsMsgType_Call;
@@ -89,16 +88,54 @@ namespace yk {
 		if (kSignalsMsgType_CreatedRoom == op_type) {
 			HandleCreatedRoomMsg(jsobj);
 		}
+		else if (kSignalsMsgType_Message == op_type) {
+			HandleRecvSDPMsg(jsobj);
+		}
 	}
 
 
 	void SignalsClient::HandleCreatedRoomMsg(const nlohmann::json& jsobj) {
-		std::string room_id = jsobj["room_id"].get<std::string>();
+		room_id_ = jsobj["room_id"].get<std::string>();
+
+
+		YK_LOGI("HandleCreatedRoomMsg the room_id : {}", room_id_);
+
+
 		if (on_created_room_msg_callback_) {
 			on_created_room_msg_callback_();
 		}
+	}
 
 
+	void SignalsClient::SendSDPMsg(const std::string& sdp, const std::string& sdp_type) {
 
+
+		YK_LOGI("SendSDPMsg room_id : {}", room_id_);
+
+
+		task_worker_.AsyncTask(
+			[=]() {
+				auto settings = Settings::GetInstance();
+				nlohmann::json jsobj;
+				jsobj["room_id"] = room_id_;
+				jsobj["client_id"] = settings->client_id;
+				jsobj["operation_type"] = kSignalsMsgType_Message;
+				jsobj["content"] = sdp;
+				jsobj["sdp_type"] = sdp_type;
+				std::string msg_str = jsobj.dump();
+				ws_ptr_->AsyncSendBin(msg_str);
+			},
+			[]() {
+			}
+		);
+	}
+
+	void SignalsClient::HandleRecvSDPMsg(const nlohmann::json& jsobj) {
+		
+		if (on_recv_sdp_msg_callback_) {
+		
+			on_recv_sdp_msg_callback_(jsobj);
+		}
+		
 	}
 }

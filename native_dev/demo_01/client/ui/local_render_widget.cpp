@@ -175,6 +175,9 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
             int width = buffer->width();
             int height = buffer->height();
 
+            // to do 这里 后面考虑copy连续内存，将内存对齐的步长也copy过去，尝试在shader
+
+            // 这里最好固定好分辨率，防止内存对齐差异
             for (int y = 0; y < height; y++) {
                 //outputFile.write(reinterpret_cast<const char*>(&dataY[y * strideY]), width);
                 memcpy(img_buf + y * width, reinterpret_cast<const char*>(&dataY[y * strideY]), width);
@@ -271,7 +274,7 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
 #endif
 
         QMetaObject::invokeMethod(this, [=]() {
-            local_renderer_.reset(new VideoRenderer((HWND)gl_video_widget_->winId(), 1, 1, local_video));
+            local_renderer_.reset(new VideoRenderer((HWND)gl_video_widget_->winId(), 1, 1, local_video));  //注意: local_renderer_ 一定要在UI线程中创建， 否则 无法渲染画面，也不报任何错误
 
 
 
@@ -283,7 +286,7 @@ rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(video_frame.video_frame_b
                      gl_video_widget_->update();
 
 
-                    std::cout << "local render UpdateI420Image" << std::endl;
+                    //std::cout << "local render UpdateI420Image" << std::endl;
 
                     }, Qt::QueuedConnection);
                 });
