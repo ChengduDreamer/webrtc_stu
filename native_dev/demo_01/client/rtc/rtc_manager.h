@@ -123,6 +123,14 @@ namespace yk {
 		}
 
 
+		using OnIceCandidateCallbackFunc = std::function<void(nlohmann::json ice_jsobj)>;
+
+		OnIceCandidateCallbackFunc on_ice_candidate_callback_ = nullptr;
+
+		void SetOnIceCandidateCallback(OnIceCandidateCallbackFunc&& cbk) {
+			on_ice_candidate_callback_ = std::move(cbk);
+		}
+
 
 		void OnRecvOfferFromPeer();
 	};

@@ -108,6 +108,13 @@ namespace yk {
 		rtc_manager_ptr_->SetOnCreatedSDPMsgCallback(std::move([=](std::string sdp_str, std::string sdp_type_str) {
 			signals_client_ptr_->SendSDPMsg(sdp_str, sdp_type_str);
 		}));
+
+
+		rtc_manager_ptr_->SetOnIceCandidateCallback(std::move([=](nlohmann::json ice_jsobj) {
+			
+			signals_client_ptr_->SendIceCandidateMsg(ice_jsobj);
+			
+		}));
 		
 	}
 
@@ -149,6 +156,8 @@ namespace yk {
 
 			}));
 
+
+			
 		});
 
 		connect(call_btn_, &QPushButton::clicked, this, [=]() {

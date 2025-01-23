@@ -21,7 +21,10 @@ namespace yk {
 		~SignalsClient();
 		void SayHello();
 		void Call(const std::string& remote_id);
-		void SendSDPMsg(const std::string& offer, const std::string& sdp_type);
+		void SendSDPMsg(const std::string& sdp, const std::string& sdp_type);
+
+		void SendIceCandidateMsg(nlohmann::json ice_jsobj);
+
 
 		void RecvMsg(const std::string msg);
 		void HandleMsg(const std::string msg);

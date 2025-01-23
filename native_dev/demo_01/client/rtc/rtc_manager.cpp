@@ -48,6 +48,7 @@
 #include "ui/local_render_widget.h"
 
 #include "common/yk_logger.h"
+#include "public/signals_def.h"
 
 #pragma comment(lib, "strmiids.lib")
 
@@ -227,29 +228,44 @@ namespace yk {
 
     void RtcManager::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
 
-        YK_LOGI("OnIceCandidate : {}", candidate->sdp_mid());
+        YK_LOGI("OnIceCandidate : {}", candidate->sdp_mline_index());
 
         //RTC_LOG(LS_INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
-        //// For loopback test. To save some connecting delay.
-        //if (loopback_) {
-        //    if (!peer_connection_->AddIceCandidate(candidate)) {
-        //        RTC_LOG(LS_WARNING) << "Failed to apply the received candidate";
-        //    }
-        //    return;
-        //}
+        // For loopback test. To save some connecting delay.
+       /* if (loopback_) {
+            if (!peer_connection_->AddIceCandidate(candidate)) {
+                RTC_LOG(LS_WARNING) << "Failed to apply the received candidate";
+            }
+            return;
+        }*/
 
-        //Json::Value jmessage;
-        //jmessage[kCandidateSdpMidName] = candidate->sdp_mid();
-        //jmessage[kCandidateSdpMlineIndexName] = candidate->sdp_mline_index();
-        //std::string sdp;
-        //if (!candidate->ToString(&sdp)) {
-        //    RTC_LOG(LS_ERROR) << "Failed to serialize candidate";
-        //    return;
-        //}
-        //jmessage[kCandidateSdpName] = sdp;
+       // Json::Value jmessage;
+       // jmessage[kCandidateSdpMidName] = candidate->sdp_mid();
+       // jmessage[kCandidateSdpMlineIndexName] = candidate->sdp_mline_index();
+       // std::string sdp;
+       // if (!candidate->ToString(&sdp)) {
+       //     RTC_LOG(LS_ERROR) << "Failed to serialize candidate";
+       //     return;
+       // }
+       // jmessage[kCandidateSdpName] = sdp;
+       //
+       // Json::StreamWriterBuilder factory;
+       // SendMessage(Json::writeString(factory, jmessage));
 
-        //Json::StreamWriterBuilder factory;
-        //SendMessage(Json::writeString(factory, jmessage));
+        nlohmann::json jsobj;
+        jsobj[kCandidateSdpMidName] = candidate->sdp_mid();
+        jsobj[kCandidateSdpMlineIndexName] = candidate->sdp_mline_index();
+        std::string sdp;
+        if (!candidate->ToString(&sdp)) {
+            YK_LOGE("Failed to serialize candidate");
+            return;
+        }
+        jsobj[kCandidateSdpName] = sdp;
+
+        if (on_ice_candidate_callback_) {
+            on_ice_candidate_callback_(jsobj);
+        }
+
     }
 
     void RtcManager::SetLocalRenderWidget(QWidget* w) {
@@ -258,7 +274,6 @@ namespace yk {
 
 
     void RtcManager::CreateOffer() {
-        
         peer_connection_->CreateOffer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     }
 
@@ -382,32 +397,47 @@ namespace yk {
             YK_LOGI("OnMessageFromPeer : {}", jsobj.dump());
 
 
-           /* std::string sdp_mid;
+            std::string sdp_mid;
             int sdp_mlineindex = 0;
             std::string sdp;
-            if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName, &sdp_mid) || !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,&sdp_mlineindex) ||
+
+
+            if (!jsobj.contains(kCandidateSdpMidName) || !jsobj.contains(kCandidateSdpMlineIndexName) || !jsobj.contains(kCandidateSdpName)) {
+                return;
+            }
+
+
+
+           /* if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName, &sdp_mid) || !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,&sdp_mlineindex) ||
                 !rtc::GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
                 RTC_LOG(LS_WARNING) << "Can't parse received message.";
                 return;
+            }*/
+
+            if (jsobj.contains(kCandidateSdpMidName)) {
+                sdp_mid = jsobj[kCandidateSdpMidName].get<std::string>();
             }
+
+            if (jsobj.contains(kCandidateSdpMlineIndexName)) {
+                sdp_mlineindex = jsobj[kCandidateSdpMlineIndexName].get<int>();
+            }
+
+            if (jsobj.contains(kCandidateSdpName)) {
+                sdp = jsobj[kCandidateSdpName].get<std::string>();
+            }
+
             webrtc::SdpParseError error;
             std::unique_ptr<webrtc::IceCandidateInterface> candidate(
                 webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
             if (!candidate.get()) {
-                RTC_LOG(LS_WARNING) << "Can't parse received candidate message. "
-                    "SdpParseError was: "
-                    << error.description;
+                YK_LOGE("Can't parse received candidate message, SdpParseError was: {}", error.description);
                 return;
             }
             if (!peer_connection_->AddIceCandidate(candidate.get())) {
-                RTC_LOG(LS_WARNING) << "Failed to apply the received candidate";
+                YK_LOGE("Failed to apply the received candidate");
                 return;
             }
-            RTC_LOG(LS_INFO) << " Received candidate :" << message;*/
-            
-        
-        
-        
+            YK_LOGI("Received candidate : {}",jsobj.dump());
         }
     }
 }

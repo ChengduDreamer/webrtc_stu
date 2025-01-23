@@ -130,6 +130,23 @@ namespace yk {
 		);
 	}
 
+
+	void SignalsClient::SendIceCandidateMsg(nlohmann::json ice_jsobj) {
+		task_worker_.AsyncTask(
+			[=]() mutable {
+				auto settings = Settings::GetInstance();
+				ice_jsobj["room_id"] = room_id_;
+				ice_jsobj["client_id"] = settings->client_id;
+				ice_jsobj["operation_type"] = kSignalsMsgType_Message;
+				std::string msg_str = ice_jsobj.dump();
+				ws_ptr_->AsyncSendBin(msg_str);
+			},
+			[]() {
+			}
+		);
+	}
+
+
 	void SignalsClient::HandleRecvSDPMsg(const nlohmann::json& jsobj) {
 		
 		if (on_recv_sdp_msg_callback_) {
