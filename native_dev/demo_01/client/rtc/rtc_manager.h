@@ -79,8 +79,9 @@ namespace yk {
 		void OnDataChannel(
 			rtc::scoped_refptr<webrtc::DataChannelInterface> channel) override {}
 		void OnRenegotiationNeeded() override {}
-		void OnIceConnectionChange(
-			webrtc::PeerConnectionInterface::IceConnectionState new_state) override {}
+
+		void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override;
+
 		void OnIceGatheringChange(
 			webrtc::PeerConnectionInterface::IceGatheringState new_state) override {}
 		void OnIceCandidate(const webrtc::IceCandidateInterface* candidate) override;

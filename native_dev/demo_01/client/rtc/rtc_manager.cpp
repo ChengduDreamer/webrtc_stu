@@ -162,6 +162,9 @@ namespace yk {
         if (error_or_peer_connection.ok()) {
             peer_connection_ = std::move(error_or_peer_connection.value());
         }
+
+        AddTracks();
+
         return peer_connection_ != nullptr;
     }
 
@@ -218,6 +221,11 @@ namespace yk {
        /* RTC_LOG(LS_INFO) << __FUNCTION__ << " " << receiver->id();
         main_wnd_->QueueUIThreadCallback(NEW_TRACK_ADDED,
             receiver->track().release());*/
+
+
+
+        std::cout << "OnAddTrack ............... " << std::endl;
+
     }
 
     void RtcManager::OnRemoveTrack(
@@ -388,7 +396,7 @@ namespace yk {
             //qDebug() << " Received session description :" << message;
             peer_connection_->SetRemoteDescription(DummySetSessionDescriptionObserver::Create().get(), session_description.release());
             if (type == webrtc::SdpType::kOffer) {
-                AddTracks();
+                /*AddTracks();*/
                 peer_connection_->CreateAnswer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
             }
         }
@@ -440,4 +448,19 @@ namespace yk {
             YK_LOGI("Received candidate : {}",jsobj.dump());
         }
     }
+
+
+    void RtcManager::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) {
+
+        std::cout << "ice new_state = " << static_cast<int>(new_state) << std::endl;
+
+        if (new_state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionConnected) {
+            // 连接已建立
+        }
+        else if (new_state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionDisconnected) {
+            // 连接已断开
+        }
+        
+    }
+
 }
